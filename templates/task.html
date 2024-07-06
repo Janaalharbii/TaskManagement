@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Always Be With Me</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="https://icons.iconarchive.com/icons/bootstrap/bootstrap/512/Bootstrap-clipboard2-check-icon.png">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">Always Be With Me</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('task') }}">My List</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <div class="card text-bg-light mb-3">
+            <div class="card-body">
+        <h1 class="text-center">Always Be With Me</h1>
+        
+        <form id="task-form" class="form-inline justify-content-center mb-4">
+            <input type="text" id="new-task" class="form-control mr-2" placeholder="Add new task">
+            <input type="time" id="task-time" class="form-control mr-2">
+            <input type="date" id="task-date" class="form-control mr-2">
+            <input type="text" id="task-type" class="form-control mr-2" placeholder="about">
+            <input type="color" id="task-color" class="form-control mr-2">
+            <button type="button" class="btn btn-success" onclick="addTask()">Add</button>
+        </form>
+          
+</div>
+</div>
+</div>
+
+<div class="container mt-5">
+        <div class="card "style="background-color: #b4c092;">
+            <div class="card-body">
+        <h2 id="task-list" class="text-center">Tasks List</h2>
+        <div class="task-container">
+            <!-- Tasks will be added here dynamically using JavaScript -->
+        </div>
+        <button class="btn btn-danger btn-block" onclick="deleteAllTasks()">Delete all tasks</button>
+ 
+    </div>
+</div>
+</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const taskDateInput = document.getElementById('task-date');
+            const today = new Date().toISOString().split('T')[0];
+            taskDateInput.setAttribute('min', today);
+
+            loadTasksFromLocalStorage(); 
+        });
+
+        function formatAMPM(date) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            let strTime = hours + ':' + minutes + ' ' + ampm;
+            return strTime;
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('new-task'); 
+            const taskTime = document.getElementById('task-time');
+            const taskDate = document.getElementById('task-date'); 
+            const taskType = document.getElementById('task-type'); 
+            const taskColor = document.getElementById('task-color'); 
+
+            const taskText = taskInput.value.trim(); 
+            const taskTimeValue = taskTime.value;
+            const taskDateValue = taskDate.value;
+            const taskTypeValue = taskType.value.trim(); 
+            const taskColorValue = taskColor.value; 
+
+            if (taskText !== '' && taskTimeValue !== '' && taskDateValue !== '' && taskTypeValue !== '' && taskColorValue !== '') { 
+                const taskContainer = document.querySelector('.task-container'); 
+                const taskItem = document.createElement('div'); 
+                taskItem.className = 'task-item'; 
+                taskItem.style.borderLeft = `10px solid ${taskColorValue}`; 
+
+                const formattedTime = formatAMPM(new Date(`1970-01-01T${taskTimeValue}`));
+
+                taskItem.innerHTML = `
+                    <div class="task-details">
+                        <div class="task-text"><strong>${taskText}</strong></div>
+                        <div class="task-time-date">${formattedTime} - ${taskDateValue}</div>
+                        <div class="task-type" style="color: ${taskColorValue}">${taskTypeValue}</div>
+                    </div>
+                    <div class="task-actions">
+                        <a href="#" onclick="editTask(this)" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="#" onclick="deleteTask(this)" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                `;
+                taskContainer.appendChild(taskItem);
+                saveTaskToLocalStorage(taskText, taskTimeValue, taskDateValue, taskTypeValue, taskColorValue);
+
+                taskInput.value = ''; 
+                taskTime.value = '';
+                taskDate.value = '';
+                taskType.value = '';
+                taskColor.value = '#000000';
+            }
+        }
+
+        function editTask(link) {
+            const taskItem = link.closest('.task-item'); 
+            const taskText = taskItem.querySelector('.task-text strong').innerText.trim();
+            const taskTimeDate = taskItem.querySelector('.task-time-date').innerText.split(' - ');
+            const taskTime = taskTimeDate[0].trim().split(' ')[0];
+            const taskDate = taskTimeDate[1].trim();
+            const taskType = taskItem.querySelector('.task-type').innerText.trim();
+            const taskColor = taskItem.style.borderLeftColor;
+
+            document.getElementById('new-task').value = taskText;
+            document.getElementById('task-time').value = taskTime;
+            document.getElementById('task-date').value = taskDate;
+            document.getElementById('task-type').value = taskType;
+            document.getElementById('task-color').value = taskColor;
+
+            deleteTask(link);
+
+            window.scrollTo(0, 0);
+        }
+
+        function deleteTask(link) {
+            const taskItem = link.closest('.task-item');
+            const taskText = taskItem.querySelector('.task-text strong').innerText.trim();
+            const taskTimeDate = taskItem.querySelector('.task-time-date').innerText.split(' - ');
+            const taskTime = taskTimeDate[0].trim().split(' ')[0];
+            const taskDate = taskTimeDate[1].trim();
+            const taskType = taskItem.querySelector('.task-type').innerText.trim();
+            const taskColor = taskItem.style.borderLeftColor;
+
+            taskItem.remove(); 
+            removeTaskFromLocalStorage(taskText, taskTime, taskDate, taskType, taskColor); 
+        }
+
+        function saveTaskToLocalStorage(taskText, taskTime, taskDate, taskType, taskColor) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || []; 
+            tasks.push({ taskText, taskTime, taskDate, taskType, taskColor }); 
+            localStorage.setItem('tasks', JSON.stringify(tasks)); 
+        }
+
+        function removeTaskFromLocalStorage(taskText, taskTime, taskDate, taskType, taskColor) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.filter(task => !(task.taskText === taskText && task.taskTime === taskTime && task.taskDate === taskDate && task.taskType === taskType && task.taskColor === taskColor));
+            localStorage.setItem('tasks', JSON.stringify(tasks)); 
+        }
+
+        function loadTasksFromLocalStorage() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskContainer = document.querySelector('.task-container'); 
+            tasks.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.style.borderLeft = `10px solid ${task.taskColor}`; 
+
+                const formattedTime = formatAMPM(new Date(`1970-01-01T${task.taskTime}`));
+
+                taskItem.innerHTML = `
+                    <div class="task-details">
+                        <div class="task-text"><strong>${task.taskText}</strong></div>
+                        <div class="task-time-date">${formattedTime} - ${task.taskDate}</div>
+                        <div class="task-type" style="color: ${task.taskColor}">${task.taskType}</div>
+                    </div>
+                    <div class="task-actions">
+                        <a href="#" onclick="editTask(this)" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="#" onclick="deleteTask(this)" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                `;
+                taskContainer.appendChild(taskItem);
+            });
+        }
+
+        function deleteAllTasks() {
+            if (confirm('Are you sure want to delete all tasks?')) {
+                localStorage.removeItem('tasks');
+                document.querySelector('.task-container').innerHTML = '';
+            }
+        }
+    
+    </script>
+    
+</body>
+</html>

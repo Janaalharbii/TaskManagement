@@ -1,0 +1,57 @@
+body {
+    /*direction: rtl;
+    text-align: right;  
+    background-color:#f7efe2; 
+    background-image: url('/Users/doniakhojah/firstpythonapi/task_manager/Task_img.jpg');*/
+
+    background-image: url('https://i.pinimg.com/originals/78/6a/f4/786af462935b047990577cf7e4c56334.jpg');
+
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+}
+.navbar {
+    background-color: #8e6456;
+}
+.navbar-brand {
+    color: #f7efe2!important;
+    font-weight: bold;
+}
+.nav-link {
+    color: #f7efe2 !important;
+}
+.nav-link:hover {
+    background-color: #825445;
+}
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.task-details {
+    flex-grow: 1;
+}
+.task-actions {
+    display: flex;
+    gap: 10px;
+}
+.task-type {
+    font-weight: bold;
+    margin-left: 10px;
+}
+.btn-success{
+    background-color: #825445;
+}
+.btn-danger{
+    background-color: #c35454;
+}
