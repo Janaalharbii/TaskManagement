@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 tasks = []
 
-@app.route('/index')
+@app.route('/')
 def index():
     return render_template('indexx.html', tasks=tasks)
 
